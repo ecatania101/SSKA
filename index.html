@@ -1,13 +1,71 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
-    <link rel="stylesheet" href="publication-web-resources/css/main.patched.css" />
-    <script src="publication-web-resources/script/main.patched.js"></script>
+    <link rel="stylesheet" href="publication-web-resources/css/main.css">
+    <style>
+      /* --- overrides --- */
+      html, body { min-height: 100%; }
+
+      /* Make the real iframe part of the page flow and at least viewport tall */
+      #contentIFrame {
+        position: static !important;   /* was absolute */
+        display: block;
+        width: 100%;
+        border: 0;
+        height: auto !important;       /* JS will set exact px height */
+        min-height: 100svh;            /* fills viewport; try 100dvh if you prefer */
+      }
+
+      /* Ensure the preloader iframe never shows */
+      #dummyIFrame { display: none !important; }
+
+      /* If you want arrows to float while scrolling */
+      .prev, .next {
+        position: fixed !important;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 9999;
+      }
+    </style>
+
+    <script src="publication-web-resources/script/main.js"></script>
   </head>
   <body onload="showHideArrows()">
-    <iframe onload="showHideArrows()" id="contentIFrame" class="contentIframeClass" src="publication-web-resources/html/publication.html"></iframe>
-    <iframe id="dummyIFrame" class="dummyIFrameClass"></iframe>
+    <iframe id="contentIFrame" class="contentIframeClass"
+            src="publication-web-resources/html/publication.html"></iframe>
+
+    <!-- keep the preloader hidden (belt & suspenders) -->
+    <iframe id="dummyIFrame" class="dummyIFrameClass" hidden aria-hidden="true"></iframe>
+
     <div class="prev" onclick="showPreviousPage()">&#10094;</div>
     <div class="next" onclick="showNextPage()">&#10095;</div>
+
+    <script>
+      // Auto-size the iframe to its content height (works for same-origin only)
+      (function () {
+        const ifr = document.getElementById('contentIFrame');
+
+        function resize() {
+          if (!ifr) return;
+          try {
+            const d = ifr.contentWindow.document;
+            const h = Math.max(
+              d.body ? d.body.scrollHeight : 0,
+              d.documentElement ? d.documentElement.scrollHeight : 0
+            ) || window.innerHeight;
+            ifr.style.height = h + 'px';
+          } catch (e) {
+            // Cross-origin fallback: fill viewport
+            ifr.style.height = window.innerHeight + 'px';
+          }
+        }
+
+        window.addEventListener('load', () => {
+          if (ifr) ifr.addEventListener('load', resize); // runs when you change pages
+          resize();
+        });
+        window.addEventListener('resize', resize);
+      })();
+    </script>
   </body>
 </html>
