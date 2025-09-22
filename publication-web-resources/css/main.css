@@ -25,3 +25,24 @@ html, body {
 	margin: 0;
 	overflow: hidden
 }
+
+
+/* === Overrides: make iframe participate in page flow and be taller === */
+html, body {
+  min-height: 100%;
+}
+.contentIframeClass {
+  position: static !important;   /* remove absolute positioning */
+  display: block;
+  width: 100%;
+  border: 0;
+  height: auto !important;       /* let JS set pixel height */
+  min-height: 100svh;            /* fill at least the viewport on mobile */
+}
+/* Keep nav arrows overlayed regardless of page scroll */
+.prev, .next {
+  position: fixed !important;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 9999;
+}
